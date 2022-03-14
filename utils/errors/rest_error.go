@@ -1,6 +1,8 @@
 package errors
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type RestErr struct {
 	Message string `json:"message"`
