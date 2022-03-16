@@ -1,10 +1,10 @@
 package users
 
 import (
-	"fmt"
 	"github.com/mustafakocatepe/go-bookstore-users-api/datasources/mysql/users_db"
 	"github.com/mustafakocatepe/go-bookstore-users-api/utils/date_utils"
 	"github.com/mustafakocatepe/go-bookstore-users-api/utils/errors"
+	"github.com/mustafakocatepe/go-bookstore-users-api/utils/mysql_utils"
 )
 
 const (
@@ -23,10 +23,8 @@ func (user *User) Get() *errors.RestErr {
 	//stmt.Query()    //Eğer sorgumuz bize birden fazla row döndürecekse Query kullanırız. Geri dönüş tipi *Rows
 
 	result := stmt.QueryRow(user.Id)
-	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.DateCreated); err != nil {
-		fmt.Println(err)
-		return errors.NewBadRequestError(
-			fmt.Sprintf("error when trying to get user %d: %s", user.Id, err.Error()))
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.DateCreated); getErr != nil {
+		return mysql_utils.ParseError(err)
 	}
 	return nil
 }
@@ -40,16 +38,14 @@ func (user *User) Save() *errors.RestErr {
 
 	user.DateCreated = date_utils.GetNowString()
 
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
-	if err != nil {
-		return errors.NewInternalServerError(
-			fmt.Sprintf("error when trying to save user: %s", err.Error()))
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if saveErr != nil {
+		return mysql_utils.ParseError(saveErr)
 	}
 
 	userId, err := insertResult.LastInsertId()
 	if err != nil {
-		return errors.NewInternalServerError(
-			fmt.Sprintf("error when trying to save user: %s", err.Error()))
+		return mysql_utils.ParseError(err)
 	}
 	user.Id = userId
 	return nil
