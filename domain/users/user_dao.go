@@ -65,3 +65,16 @@ func (user *User) Update() *errors.RestErr {
 	}
 	return nil
 }
+
+func (user *User) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare("DELETE FROM users WHERE id=?;")
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(user.Id); err != nil { //Donen result ile ilgilenmiyorum. Error'den zaten bir hata olup olmadigin anlayabiliyorum.
+		return mysql_utils.ParseError(err)
+	}
+	return nil
+}
