@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/mustafakocatepe/go-bookstore-users-api/domain/users"
+	"github.com/mustafakocatepe/go-bookstore-users-api/utils/date_utils"
 	"github.com/mustafakocatepe/go-bookstore-users-api/utils/errors"
 )
 
@@ -17,6 +18,8 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) { //Geri dönü�
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+	user.Status = users.StatusActive
+	user.DateCreated = date_utils.GetNowDBFormat()
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -41,5 +44,16 @@ func UpdateUSer(user users.User) (*users.User, *errors.RestErr) {
 func DeleteUser(userId int64) *errors.RestErr {
 	user := &users.User{Id: userId}
 	return user.Delete()
+
+}
+
+func Search(status string) ([]users.User, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.FindByStatus(status)
+	/* users, err := dao.FindByStatus(status)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil*/
 
 }
