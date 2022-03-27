@@ -20,6 +20,8 @@ type User struct {
 	//Password    string `json:"-"` // Eger json ile calisilirken "-" isareti var ise json tipind gonderilen verilerde bu alana bakmaz empty gecer.
 }
 
+type Users []User
+
 func Validate(user *User) *errors.RestErr {
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
